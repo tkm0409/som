@@ -1,0 +1,40 @@
+{
+    "servers": {
+        "server1": {
+            "name": "SQL_SERVER_1",
+            "databases": {
+                "db1": {
+                    "name": "DATABASE_1",
+                    "username": "USERNAME_1",
+                    "password": "PASSWORD_1",
+                    "tables": {
+                        "table1": "TABLE_NAME_1",
+                        "table2": "TABLE_NAME_2"
+                    }
+                },
+                "db2": {
+                    "name": "DATABASE_2",
+                    "username": "USERNAME_2",
+                    "password": "PASSWORD_2",
+                    "tables": {
+                        "table1": "TABLE_NAME_1",
+                        "table2": "TABLE_NAME_2"
+                    }
+                }
+            }
+        },
+        "server2": {
+            "name": "SQL_SERVER_2",
+            "databases": {
+                "db1": {
+                    "name": "DATABASE_1",
+                    "username": "USERNAME_1",
+                    "password": "PASSWORD_1",
+                    "tables": {
+                        "table1": "TABLE_NAME_1"
+                    }
+                }
+            }
+        }
+    }
+} 
