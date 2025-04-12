@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+  <Company>
+    <Name>Company1</Name>
+    <ConnectionString>data source=server1;initial catalog=db1;User ID=user1;Password=pass1</ConnectionString>
+  </Company>
+  <Company>
+    <Name>Company2</Name>
+    <ConnectionString>data source=server2;initial catalog=db2;User ID=user2;Password=pass2</ConnectionString>
+  </Company>
+  <Company>
+    <Name>Company3</Name>
+    <ConnectionString>data source=server3;initial catalog=db3;User ID=user3;Password=pass3</ConnectionString>
+  </Company>
+</Config> 
