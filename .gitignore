@@ -28,6 +28,7 @@ ENV/
 .venv
 env.bak/
 venv.bak/
+som-env/
 
 # IDE specific files
 .idea/
@@ -46,30 +47,13 @@ Thumbs.db
 *.csv
 trend_analysis.png
 prediction_results_*.txt
-som-env/
 dataaccessconfig.xml
+app.log
+order_prediction.log
 
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # Unit test / coverage reports
 htmlcov/
@@ -128,6 +112,9 @@ yarn-error.log*
 
 # React production build
 /SOM_NEW/som_frontend/build
+
+# Streamlit
+.streamlit/
 
 # Misc
 .DS_Store

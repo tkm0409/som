@@ -69,6 +69,14 @@ class PredictionResponse(BaseModel):
     predicted_comment: str
     reason: str
 
+class PredictionRequestWithConnection(BaseModel):
+    """Combined prediction request with connection data"""
+    order_number: str
+    server: str
+    database: str
+    username: str
+    password: str
+
 # ----- Database Functions -----
 
 def parse_connection_string(conn_str):
@@ -415,22 +423,22 @@ def get_data(connection: ConnectionData):
     
     return {"count": len(data), "data": data}
 
-@app.post("/predict")
-def predict(prediction_request: PredictionRequest, connection: ConnectionData):
+@app.post("/predict", response_model=PredictionResponse)
+def predict(request: PredictionRequestWithConnection):
     """Generate prediction for a specific order"""
     # Load the data
     data = load_data(
-        connection.server,
-        connection.database,
-        connection.username,
-        connection.password
+        request.server,
+        request.database,
+        request.username,
+        request.password
     )
     
     if not data:
         raise HTTPException(status_code=404, detail="No data found or connection failed")
     
     # Generate prediction
-    prediction = generate_prediction_for_record(prediction_request.order_number, data)
+    prediction = generate_prediction_for_record(request.order_number, data)
     
     return prediction
 

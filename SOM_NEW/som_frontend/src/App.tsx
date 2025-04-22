@@ -86,6 +86,10 @@ function App() {
   const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
   const [prediction, setPrediction] = useState<{ predicted_comment: string; reason: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+
+  // Flag to track if Patterson data has been loaded
+  const [pattersonLoaded, setPattersonLoaded] = useState<boolean>(false);
 
   // Load companies on initial render
   useEffect(() => {
@@ -95,6 +99,12 @@ function App() {
         setError(null);
         const companiesData = await api.getCompanies();
         setCompanies(companiesData);
+        
+        // Find Patterson company
+        const pattersonCompany = companiesData.find(c => c.name === "Patterson");
+        if (pattersonCompany && !pattersonLoaded) {
+          setSelectedCompany(pattersonCompany);
+        }
       } catch (err) {
         console.error('Error loading companies:', err);
         setError('Failed to load companies. Please check server connection.');
@@ -104,7 +114,7 @@ function App() {
     }
 
     loadCompanies();
-  }, []);
+  }, [pattersonLoaded]);
 
   // Load databases when a company is selected
   useEffect(() => {
@@ -116,6 +126,11 @@ function App() {
         setError(null);
         const result = await api.getDatabases(selectedCompany.name);
         setDatabases(result.databases);
+        
+        // If Patterson is selected and databases are loaded, select pSUS_Patterson_Mart database
+        if (selectedCompany.name === "Patterson" && result.databases.includes("pSUS_Patterson_Mart") && !pattersonLoaded) {
+          setSelectedDatabase("pSUS_Patterson_Mart");
+        }
       } catch (err) {
         console.error('Error loading databases:', err);
         setError('Failed to load databases. Please check server connection.');
@@ -126,7 +141,24 @@ function App() {
     }
 
     loadDatabases();
-  }, [selectedCompany]);
+  }, [selectedCompany, pattersonLoaded]);
+
+  // Automatically load Patterson data once the DB is selected
+  useEffect(() => {
+    async function autoLoadPattersonData() {
+      if (
+        !pattersonLoaded && 
+        selectedCompany && 
+        selectedCompany.name === "Patterson" && 
+        selectedDatabase === "pSUS_Patterson_Mart"
+      ) {
+        await loadData();
+        setPattersonLoaded(true);
+      }
+    }
+    
+    autoLoadPattersonData();
+  }, [selectedCompany, selectedDatabase, pattersonLoaded]);
 
   // Handle company selection
   const handleCompanySelect = (company: Company) => {
@@ -140,6 +172,11 @@ function App() {
   // Handle database selection
   const handleDatabaseSelect = (database: string) => {
     setSelectedDatabase(database);
+  };
+
+  // Toggle sidebar visibility
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   // Load data from selected company and database
@@ -194,15 +231,18 @@ function App() {
         password: selectedCompany.password,
       };
       
+      // Fix for 422 error - make separate API call to get prediction
       const result = await api.predict(
         { order_number: selectedOrder.ORDERNUMBER }, 
         connectionData
       );
       
       setPrediction(result);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error generating prediction:', err);
-      setError('Failed to generate prediction. Please try again.');
+      // Show more specific error message from API response if available
+      const errorMessage = err.response?.data?.detail || 'Failed to generate prediction. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -233,13 +273,25 @@ function App() {
           onDatabaseSelect={handleDatabaseSelect}
           onLoadData={loadData}
           loading={loading}
+          open={sidebarOpen}
+          onClose={toggleSidebar}
         />
         
         {/* Main content */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box 
+          component="main" 
+          sx={{ 
+            flexGrow: 1, 
+            p: 3,
+            marginLeft: sidebarOpen ? 0 : -35,
+            transition: 'margin 0.2s ease-in-out'
+          }}
+        >
           <Header 
             searchTerm={searchTerm} 
-            onSearchChange={(value) => setSearchTerm(value)} 
+            onSearchChange={(value) => setSearchTerm(value)}
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={toggleSidebar}
           />
           
           {error && (

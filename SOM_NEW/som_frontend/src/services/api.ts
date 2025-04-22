@@ -40,8 +40,23 @@ export const api = {
     order: PredictionRequest,
     connection: ConnectionData
   ): Promise<PredictionResponse> => {
-    const response = await apiClient.post('/predict', { ...order, ...connection });
-    return response.data;
+    try {
+      // Send only the required data to the backend
+      const requestBody = {
+        order_number: order.order_number,
+        server: connection.server,
+        database: connection.database,
+        username: connection.username,
+        password: connection.password
+      };
+
+      const response = await apiClient.post('/predict', requestBody);
+      return response.data;
+    } catch (error: any) {
+      // Log the error details to help with debugging
+      console.error('Prediction API error:', error.response?.data || error.message);
+      throw error;
+    }
   },
 
   // Test database connection

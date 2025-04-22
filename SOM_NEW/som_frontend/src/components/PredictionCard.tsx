@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Paper,
   Typography,
@@ -11,9 +11,14 @@ import {
   CardHeader,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Chip,
+  Fade,
+  Skeleton
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import ScienceIcon from '@mui/icons-material/Science';
 import { OrderData } from '../types/api';
 
 interface PredictionCardProps {
@@ -29,6 +34,8 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
   onGeneratePrediction,
   loading
 }) => {
+  const [showPlaceholder, setShowPlaceholder] = useState(false);
+
   // Get trend columns
   const trendColumns = Object.keys(selectedOrder)
     .filter(key => key.includes('TREND_LAG'))
@@ -37,6 +44,13 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
       const numB = parseInt(b.replace('TREND_LAG', '').replace('_STRNT', ''), 10);
       return numA - numB;
     });
+    
+  // Show placeholder when loading starts
+  React.useEffect(() => {
+    if (loading && !prediction) {
+      setShowPlaceholder(true);
+    }
+  }, [loading, prediction]);
 
   return (
     <Paper sx={{ borderRadius: '8px', overflow: 'hidden', mb: 4 }}>
@@ -95,41 +109,97 @@ export const PredictionCard: React.FC<PredictionCardProps> = ({
           </AccordionDetails>
         </Accordion>
         
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-start' }}>
           <Button
             variant="contained"
             color="primary"
             onClick={onGeneratePrediction}
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <AutoFixHighIcon />}
+            sx={{ 
+              px: 3, 
+              py: 1, 
+              borderRadius: '20px',
+              boxShadow: '0 4px 6px rgba(66, 99, 235, 0.2)',
+              background: 'linear-gradient(45deg, #4263eb 30%, #5e81f4 90%)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #3656d7 30%, #4263eb 90%)',
+                boxShadow: '0 6px 8px rgba(66, 99, 235, 0.3)',
+              }
+            }}
           >
-            {loading ? 'Generating...' : 'Generate AI Comment Prediction'}
+            {loading ? 'AI Magic in Progress...' : 'Generate AI Prediction'}
+            {!loading && <Chip 
+              label="AI" 
+              size="small" 
+              color="secondary" 
+              sx={{ ml: 1, height: '20px', background: 'rgba(255, 255, 255, 0.3)', color: 'white' }} 
+            />}
           </Button>
         </Box>
         
-        {prediction && (
-          <Card sx={{ mt: 3, border: '1px solid #e2e8f0', boxShadow: 'none' }}>
+        {/* Loading placeholder or prediction */}
+        {(loading || prediction || showPlaceholder) && (
+          <Card 
+            sx={{ 
+              mt: 3, 
+              border: '1px solid #e2e8f0', 
+              boxShadow: loading ? '0 0 10px rgba(66, 99, 235, 0.3)' : 'none',
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
             <CardHeader 
-              title="AI Predicted Comment" 
+              title={loading ? "AI Generating Prediction..." : "AI Predicted Comment"}
+              avatar={loading ? <ScienceIcon /> : <AutoFixHighIcon />}
               sx={{ 
-                backgroundColor: '#f0f9ff', 
+                backgroundColor: loading ? '#e6f0ff' : '#f0f9ff', 
                 borderBottom: '1px solid #e2e8f0',
                 py: 1.5
               }} 
             />
+            
             <CardContent>
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 2 }}>
-                {prediction.predicted_comment}
-              </Typography>
-              
-              <Divider sx={{ my: 2 }} />
-              
-              <Typography variant="h6" gutterBottom>
-                Reasoning
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
-                {prediction.reason}
-              </Typography>
+              {loading ? (
+                <Fade in={loading}>
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <CircularProgress size={24} sx={{ mr: 2 }} />
+                      <Typography variant="subtitle1" color="primary">
+                        AI is analyzing order patterns...
+                      </Typography>
+                    </Box>
+                    <Skeleton variant="text" height={30} animation="wave" />
+                    <Skeleton variant="text" height={30} animation="wave" width="80%" />
+                    <Skeleton variant="text" height={30} animation="wave" width="90%" />
+                    
+                    <Divider sx={{ my: 2 }} />
+                    
+                    <Typography variant="h6" gutterBottom>
+                      Reasoning
+                    </Typography>
+                    <Skeleton variant="text" height={20} animation="wave" />
+                    <Skeleton variant="text" height={20} animation="wave" />
+                    <Skeleton variant="text" height={20} animation="wave" width="70%" />
+                  </Box>
+                </Fade>
+              ) : (
+                prediction && (
+                  <Box>
+                    <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 2 }}>
+                      {prediction.predicted_comment}
+                    </Typography>
+                    
+                    <Divider sx={{ my: 2 }} />
+                    
+                    <Typography variant="h6" gutterBottom>
+                      Reasoning
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                      {prediction.reason}
+                    </Typography>
+                  </Box>
+                )
+              )}
             </CardContent>
           </Card>
         )}

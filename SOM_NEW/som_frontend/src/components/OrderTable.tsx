@@ -10,9 +10,13 @@ import {
   TablePagination,
   Typography,
   Box,
-  Chip,
   IconButton,
-  Tooltip
+  Tooltip,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+  SelectChangeEvent
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { OrderData } from '../types/api';
@@ -30,6 +34,7 @@ export const OrderTable: React.FC<OrderTableProps> = ({
 }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const rowsPerPageOptions = [5, 10, 25, 50, 100];
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -54,9 +59,36 @@ export const OrderTable: React.FC<OrderTableProps> = ({
   
   return (
     <Paper sx={{ width: '100%', mb: 4, borderRadius: '8px', overflow: 'hidden' }}>
-      <Typography variant="h2" sx={{ p: 2, backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-        Order Data
-      </Typography>
+      <Box sx={{ 
+        p: 2, 
+        backgroundColor: '#f8fafc', 
+        borderBottom: '1px solid #e2e8f0',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <Typography variant="h2">Order Data</Typography>
+        
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <InputLabel id="rows-per-page-label">Rows per page</InputLabel>
+          <Select
+            labelId="rows-per-page-label"
+            id="rows-per-page-select"
+            value={rowsPerPage.toString()}
+            label="Rows per page"
+            onChange={(e: SelectChangeEvent) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+          >
+            {rowsPerPageOptions.map(option => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
       
       <TableContainer sx={{ maxHeight: 440 }}>
         <Table stickyHeader>
@@ -134,7 +166,7 @@ export const OrderTable: React.FC<OrderTableProps> = ({
       </TableContainer>
       
       <TablePagination
-        rowsPerPageOptions={[10, 25, 50, 100]}
+        rowsPerPageOptions={rowsPerPageOptions}
         component="div"
         count={data.length}
         rowsPerPage={rowsPerPage}

@@ -3,9 +3,6 @@ import {
   Box, 
   Drawer, 
   Typography, 
-  List, 
-  ListItem, 
-  ListItemText, 
   Select, 
   MenuItem, 
   FormControl, 
@@ -13,8 +10,10 @@ import {
   Button, 
   Divider,
   SelectChangeEvent,
-  CircularProgress
+  CircularProgress,
+  IconButton
 } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { Company } from '../types/api';
 
 interface SidebarProps {
@@ -26,6 +25,8 @@ interface SidebarProps {
   onDatabaseSelect: (database: string) => void;
   onLoadData: () => void;
   loading: boolean;
+  open: boolean;
+  onClose: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -36,7 +37,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCompanySelect,
   onDatabaseSelect,
   onLoadData,
-  loading
+  loading,
+  open,
+  onClose
 }) => {
   const handleCompanyChange = (event: SelectChangeEvent<string>) => {
     const companyName = event.target.value;
@@ -52,7 +55,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <Drawer
-      variant="permanent"
+      variant="persistent"
+      anchor="left"
+      open={open}
       sx={{
         width: 280,
         flexShrink: 0,
@@ -65,9 +70,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }}
     >
       <Box sx={{ p: 3 }}>
-        <Typography variant="h1" component="h1" sx={{ mb: 3, color: '#1c2a5e' }}>
-          AI Data Review
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h1" component="h1" sx={{ color: '#1c2a5e' }}>
+            AI Data Review
+          </Typography>
+          <IconButton onClick={onClose}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </Box>
 
         <Divider sx={{ mb: 3 }} />
 
@@ -118,21 +128,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {loading ? <CircularProgress size={24} color="inherit" /> : 'Load Data'}
           </Button>
         </Box>
-
-        <Divider sx={{ mb: 3 }} />
-
-        <Typography variant="h3" component="h3" sx={{ mb: 2 }}>
-          Debug Mode
-        </Typography>
-
-        <Button
-          variant="outlined"
-          size="small"
-          fullWidth
-          sx={{ mb: 2 }}
-        >
-          Toggle Debug Mode
-        </Button>
       </Box>
     </Drawer>
   );
